@@ -3,8 +3,11 @@ const axios = require('axios');
 const redis = require('redis');
 require('dotenv').config();
 const app = express();
-const redisPort = 6379;
-const client = redis.createClient(redisPort);
+const redisConfig = {
+  port: 6379,
+  db: 1,
+};
+const client = redis.createClient(redisConfig);
 
 client.on('error', (err) => {
   console.log(err);
