@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const redis = require('redis');
+const cors = require('cors');
 require('dotenv').config();
 const app = express();
 const redisConfig = {
@@ -12,6 +13,9 @@ const client = redis.createClient(redisConfig);
 client.on('error', (err) => {
   console.log(err);
 });
+
+// CORS
+app.use(cors());
 
 const premierLeague = {
   headers: {
