@@ -5,6 +5,7 @@ const cors = require('cors');
 require('dotenv').config();
 const app = express();
 const redisConfig = {
+  host: process.env.REDIS_HOST,
   port: 6379,
   db: 1,
 };
@@ -103,6 +104,6 @@ app.get('/championship', async (req, res) => {
   }
 });
 
-app.listen(process.env.PORT || 3000, () => {
+app.listen(process.env.PORT || 3001, () => {
   console.log(`Server running`);
 });
