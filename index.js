@@ -25,7 +25,7 @@ const premierLeague = {
   },
   params: {
     league: '39',
-    season: '2020',
+    season: '2021',
   },
 };
 
@@ -36,7 +36,7 @@ const championship = {
   },
   params: {
     league: '40',
-    season: '2020',
+    season: '2021',
   },
 };
 
