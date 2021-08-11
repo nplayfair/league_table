@@ -2,21 +2,13 @@ const express = require('express');
 const axios = require('axios');
 const redis = require('redis');
 const cors = require('cors');
-require('dotenv').config();
 const app = express();
 
-if (process.env.NODE_ENV === 'production') {
-  const redisConfig = {
+const redisConfig = {
     url: process.env.REDIS_URL,
     db: 1,
-  }
-} else {
-  const redisConfig = {
-    host: process.env.REDIS_HOST,
-    port: 6379,
-    db: 1,
-  };
 }
+
 const client = redis.createClient(redisConfig);
 
 client.on('error', (err) => {
