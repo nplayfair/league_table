@@ -1,15 +1,15 @@
-const express = require('express');
-const axios = require('axios');
-const redis = require('redis');
-const cors = require('cors');
-const { param, validationResult } = require('express-validator');
+const express = require("express");
+const axios = require("axios");
+const redis = require("redis");
+const cors = require("cors");
+const { param, validationResult } = require("express-validator");
 const app = express();
 
 // Redis setup
 const redisConfig = {
   url: process.env.REDIS_URL,
   database: 1,
-}
+};
 
 let redisClient;
 
@@ -26,16 +26,16 @@ app.use(cors());
 
 // Legacy fetch function
 function LeagueSeason(league, season) {
-  this.url = 'https://api-football-v1.p.rapidapi.com/v3/standings';
-  this.method = 'GET';
+  this.url = "https://api-football-v1.p.rapidapi.com/v3/standings";
+  this.method = "GET";
   this.params = {
     league: league,
     season: season,
   };
   this.headers = {
-    'X-RapidAPI-Host': process.env.API_HOST,
-    'X-RapidAPI-Key': process.env.API_KEY,
-  }
+    "X-RapidAPI-Host": process.env.API_HOST,
+    "X-RapidAPI-Key": process.env.API_KEY,
+  };
 }
 
 // Fetch table from remote API
@@ -64,7 +64,7 @@ async function getLeagueTable(req, res) {
       // Fetch remotely
       results = await fetchTable(league, season);
       if (results.length === 0) {
-        throw "API returned no data"
+        throw "API returned no data";
       }
       // Store table in cache
       await redisClient.set(seasontable, JSON.stringify(results), {
@@ -75,7 +75,7 @@ async function getLeagueTable(req, res) {
     // Return the league table for the corresponding season
     res.status(200).send({
       fromCache: isCached,
-      table: results
+      table: results,
     });
   } catch (error) {
     console.error(error);
@@ -85,18 +85,26 @@ async function getLeagueTable(req, res) {
 
 // Routes
 // new method
-app.get('/league/:league/:season', getLeagueTable);
+app.get("/league/:league/:season", getLeagueTable);
 
 // Current Premier League Table
-app.get('/pl', getLeagueTable);
+app.get("/pl", getLeagueTable);
 
-
-app.get('/v2/:league/:year', 
+app.get(
+  "/v2/:league/:year",
   [
     // League id must be one of these
-    param('league').isIn(['39', '40', '41', '42']),
+    param("league").isIn(["39", "40", "41", "42"]),
     // Year must be no earlier than 2018
-    param('year').isIn(['2018', '2019', '2020', '2021']),
+    param("year").isIn([
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023",
+      "2024",
+    ]),
   ],
   async (req, res) => {
     // Validate
@@ -116,13 +124,13 @@ app.get('/v2/:league/:year',
         if (leagueTable) {
           res.status(200).send({
             table: JSON.parse(leagueTable),
-            message: 'data retrieved from cache',
+            message: "data retrieved from cache",
           });
         } else {
           // Fetch from the API
           reqSeason = new LeagueSeason(league, year);
           const leagueTable = await axios.get(
-            'https://v3.football.api-sports.io/standings',
+            "https://v3.football.api-sports.io/standings",
             reqSeason
           );
           // Save result to cache
@@ -130,14 +138,15 @@ app.get('/v2/:league/:year',
           // Return data from API
           res.status(200).send({
             table: leagueTable.data,
-            message: 'cache miss',
+            message: "cache miss",
           });
         }
       });
     } catch (err) {
       res.status(500).send({ message: err.message });
     }
-});
+  }
+);
 
 app.listen(process.env.PORT || 3001, () => {
   console.log(`Server running`);
